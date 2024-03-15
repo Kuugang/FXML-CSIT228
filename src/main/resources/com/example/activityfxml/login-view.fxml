@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Text?>
+
+
+<AnchorPane fx:id="paneParent" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.activityfxml.HelloController">
+   <children>
+      <VBox alignment="CENTER" prefHeight="463.0" prefWidth="486.0" spacing="20.0">
+          <padding>
+              <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+          </padding>
+         <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Welcome" />
+         <VBox prefHeight="80.0" prefWidth="295.0">
+            <children>
+               <HBox alignment="TOP_CENTER" prefHeight="59.0" prefWidth="295.0">
+                  <children>
+                     <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Username: " />
+                     <TextField fx:id="inputUsername" minHeight="-Infinity" minWidth="-Infinity" prefHeight="25.0" prefWidth="149.0" />
+                  </children>
+               </HBox>
+               <HBox alignment="TOP_CENTER" prefHeight="59.0" prefWidth="295.0">
+                  <children>
+                     <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Password: " />
+                     <TextField fx:id="inputPassword" minHeight="-Infinity" minWidth="-Infinity" prefHeight="25.0" prefWidth="149.0" />
+                  </children>
+               </HBox>
+               <HBox alignment="TOP_CENTER" prefHeight="100.0" prefWidth="200.0">
+                  <children>
+                     <Text fx:id="messageText" strokeType="OUTSIDE" strokeWidth="0.0" />
+                  </children>
+               </HBox>
+                <Button onAction="#onSignIn" text="Sign in" />
+            </children>
+         </VBox>
+      </VBox>
+   </children>
+</AnchorPane>
