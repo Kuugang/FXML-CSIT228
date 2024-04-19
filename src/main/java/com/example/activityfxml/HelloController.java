@@ -15,14 +15,16 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.sql.*;
 import java.util.HashMap;
-import java.util.Objects;
 
 public class HelloController {
+    public static int userid;
+    public static String firstname;
+    public static String lastname;
+    public static String email;
+    public static String username;
 
     public ColorPicker cpPicker;
     public Text messageText;
@@ -38,62 +40,53 @@ public class HelloController {
     HashMap<String, String> users = new HashMap<>();
     @FXML
     void onSignIn(ActionEvent event) throws IOException {
-        users.put("test", "test");
-        users.put("test2", "test2");
-        users.put("test3", "test3");
+        try(Connection c = MySQLConnection.getConnection();
+            PreparedStatement statement = c.prepareStatement(
+                    "SELECT * FROM users WHERE username = ? AND password = ?"
+            );
+            ){
+            statement.setString(1, inputUsername.getText());
+            statement.setString(2, inputPassword.getText());
 
-        if(users.containsKey(inputUsername.getText())&& users.get(inputUsername.getText()).equals(inputPassword.getText())){
-            user = inputUsername.getText();
-            Parent scene = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("dashboard-view.fxml")));
-            paneParent.getScene().getStylesheets().clear();
-            paneParent.getChildren().clear();
-            paneParent.getChildren().add(scene);
+            ResultSet resultSet = statement.executeQuery();
 
-            if(Objects.equals(inputUsername.getText(), "test")){
-                paneParent.getScene().getStylesheets().add(getClass().getResource("user1.css").toExternalForm());
-            }else if(Objects.equals(inputUsername.getText(), "test2")){
-                paneParent.getScene().getStylesheets().add(getClass().getResource("user2.css").toExternalForm());
-            }else if(Objects.equals(inputUsername.getText(), "test3")){
-                paneParent.getScene().getStylesheets().add(getClass().getResource("user3.css").toExternalForm());
+            if(resultSet.next()){
+                userid = resultSet.getInt("id");
+                firstname = resultSet.getString("firstname");
+                lastname = resultSet.getString("lastname");
+                email = resultSet.getString("email");
+                username = resultSet.getString("username");
+
+                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("dashboard-view.fxml"));
+                Parent root = (Parent) fxmlLoader.load();
+
+//                VBox vbox = (VBox) root.getChildrenUnmodifiable().get(0);
+//                Text greeting = (Text)vbox.getChildren().get(0);
+//                greeting.setText(greeting.getText() + " " + username);
+//
+                Scene scene = new Scene(root);
+                Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+
+                stage.setScene(scene);
+                stage.setTitle("Dashboard");
+                stage.show();
+            }else{
+                messageText.setText("Invalid username or password");
+                messageText.setFill(Color.RED);
+                System.out.println("Invalid username or password");
             }
-
-        }else{
-            messageText.setFill(Color.RED);
-            messageText.setText("username or password does not exist");
+        }catch (SQLException e){
+            e.printStackTrace();
         }
     }
-
-    public void onSignOut(ActionEvent event) throws IOException {
-        StringBuilder sb = new StringBuilder();
-
-        sb.append("\n.button{\n\t-fx-background-color: #");
-
-        String cpColor = cpPicker.getValue().toString();
-        sb.append(cpColor.substring(2, cpColor.length() - 2));
-        sb.append(";\n}");
-        System.out.println(cpPicker.getValue());
-
-        try{
-            BufferedWriter bw = null;
-            if(Objects.equals(user, "test")){
-               bw = new BufferedWriter(new FileWriter(getClass().getResource("user1.css").getPath(), true));
-            }else  if (Objects.equals(user, "test2")) {
-                bw = new BufferedWriter(new FileWriter(getClass().getResource("user2.css").getPath(), true));
-            }else if(Objects.equals(user, "test3")){
-                bw = new BufferedWriter(new FileWriter(getClass().getResource("user3.css").getPath(), true));
-            }
-            bw.write(sb.toString());
-            bw.close();
-        }catch (IOException e){
-
-        }
-
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("login-view.fxml"));
+    @FXML
+    public void onRegister(ActionEvent event) throws IOException{
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("register-view.fxml"));
         Parent root = (Parent) fxmlLoader.load();
         Scene scene = new Scene(root);
         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
         stage.setScene(scene);
-        stage.setTitle("Main Screen");
+        stage.setTitle("Register");
         stage.show();
     }
 }
