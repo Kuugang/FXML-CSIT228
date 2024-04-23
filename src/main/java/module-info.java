@@ -6,4 +6,6 @@ module com.example.activityfxml {
 
     opens com.example.activityfxml to javafx.fxml;
     exports com.example.activityfxml;
+    exports com.example.activityfxml.Database;
+    opens com.example.activityfxml.Database to javafx.fxml;
 }
