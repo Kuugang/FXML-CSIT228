@@ -17,7 +17,7 @@ import java.util.HashMap;
 
 
 public class MySQLConnection {
-    public static final String URL = "jdbc:mysql://localhost:3306/csit228fxml";
+    public static String URL = "jdbc:mysql://localhost:3306";
     private static final String USERNAME = "root";
     private static final String PASSWORD = "";
     public static Connection getConnection() {
@@ -25,8 +25,17 @@ public class MySQLConnection {
         try{
             Class.forName("com.mysql.cj.jdbc.Driver");
             connection = DriverManager.getConnection(URL, USERNAME, PASSWORD);
+
             Statement statement = connection.createStatement();
             String query = """
+                CREATE DATABASE IF NOT EXISTS csit228fxml
+                """;
+            statement.execute(query);
+
+            connection = DriverManager.getConnection(URL + "/csit228fxml", USERNAME, PASSWORD);
+
+            statement = connection.createStatement();
+            query = """
                 CREATE TABLE IF NOT EXISTS users(
                     id INT AUTO_INCREMENT PRIMARY KEY,
                     username VARCHAR(50) NOT NULL,
@@ -133,18 +142,18 @@ public class MySQLConnection {
 
         sb.delete(sb.length() - 2, sb.length());
         sb.append(" WHERE id = ?");
-
-        Connection c = getConnection();
-
-        PreparedStatement statement = c.prepareStatement(sb.toString());
-
-        int index = 1;
-        for (HashMap.Entry<String, String> entry : update.entrySet()) {
-            String value = entry.getValue();
-            statement.setString(index++, value);
+        try(
+            Connection c = getConnection();
+            PreparedStatement statement = c.prepareStatement(sb.toString());)
+        {
+            int index = 1;
+            for (HashMap.Entry<String, String> entry : update.entrySet()) {
+                String value = entry.getValue();
+                statement.setString(index++, value);
+            }
+            statement.setInt(index, User.id);
+            return statement.executeUpdate();
         }
-        statement.setInt(index, User.id);
-        return statement.executeUpdate();
     }
 
     public static void deleteAccount() throws SQLException{
@@ -179,35 +188,42 @@ public class MySQLConnection {
     }
 
     public static void createNote(String note) throws  SQLException{
-        Connection c = getConnection();
-        PreparedStatement statement = c.prepareStatement(
-                "INSERT INTO notes (userid, note) VALUES (?, ?)"
-        );
-
-        statement.setInt(1, User.id);
-        statement.setString(2, note);
-        statement.executeUpdate();
+        try(
+            Connection c = getConnection();
+            PreparedStatement statement = c.prepareStatement(
+                    "INSERT INTO notes (userid, note) VALUES (?, ?)"
+            );
+        ){
+            statement.setInt(1, User.id);
+            statement.setString(2, note);
+            statement.executeUpdate();
+        }
     }
 
     public static void deleteNote(int id) throws SQLException {
-        Connection c = getConnection();
-        PreparedStatement statement = c.prepareStatement(
-                "DELETE FROM notes WHERE id = ?"
-        );
+        try(
+            Connection c = getConnection();
+            PreparedStatement statement = c.prepareStatement(
+                    "DELETE FROM notes WHERE id = ?"
+            );
+        ){
 
         statement.setInt(1, id);
         statement.executeUpdate();
+        }
     }
 
     public static void updateNote(Note note, String newNote) throws SQLException{
-        Connection c = getConnection();
-        PreparedStatement statement = c.prepareStatement(
-                "UPDATE notes SET note = ? WHERE id = ?"
-        );
-
-        statement.setString(1, newNote);
-        statement.setInt(2, note.id);
-        statement.executeUpdate();
+        try(
+            Connection c = getConnection();
+            PreparedStatement statement = c.prepareStatement(
+                    "UPDATE notes SET note = ? WHERE id = ?"
+            );
+        ){
+            statement.setString(1, newNote);
+            statement.setInt(2, note.id);
+            statement.executeUpdate();
+        }
     }
 
 
